@@ -7,9 +7,8 @@
 
 std::vector<Token> scan_file(const std::string& file_contents) {
     std::vector<Token> tokens;
-    if (file_contents.empty()) return tokens;
 
-    for (const char character : file_contents) {
+    for (char character : file_contents) {
         Token token = tokenize(character);
         if (token == Token::UNKNOWN) continue;
 

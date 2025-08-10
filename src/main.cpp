@@ -14,7 +14,6 @@ std::string read_file_contents(const std::string& filename);
 int main(int argc, char *argv[]) {
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
-    std::cerr << "Logs from your program will appear here!" << std::endl;
 
     if (argc < 3) {
         std::cerr << "Usage: ./your_program tokenize <filename>" << std::endl;
