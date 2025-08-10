@@ -1,48 +1,46 @@
 #include <cstring>
+#include <vector>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstdlib>
+
+#include "scanner.hpp"
+#include "token.hpp"
 
 std::string read_file_contents(const std::string& filename);
 
 int main(int argc, char *argv[]) {
-    // Disable output buffering
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
-
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
     std::cerr << "Logs from your program will appear here!" << std::endl;
 
     if (argc < 3) {
         std::cerr << "Usage: ./your_program tokenize <filename>" << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
     const std::string command = argv[1];
-
+    const std::string filename = argv[2];
     if (command == "tokenize") {
-        std::string file_contents = read_file_contents(argv[2]);
-        
-        if (!file_contents.empty()) {
-            std::cerr << "Scanner not implemented" << std::endl;
-            return 1;
-        }
-        std::cout << "EOF  null" << std::endl; // Placeholder, replace this line when implementing the scanner
-        
+        std::string file_contents = read_file_contents(filename);
+        std::vector<Token> tokens = scan_file(file_contents);
+
+        read_tokens(tokens);
     } else {
         std::cerr << "Unknown command: " << command << std::endl;
-        return 1;
+        return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 std::string read_file_contents(const std::string& filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error reading file: " << filename << std::endl;
-        std::exit(1);
+        std::exit(EXIT_FAILURE);
     }
 
     std::stringstream buffer;
