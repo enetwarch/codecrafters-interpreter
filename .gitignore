@@ -51,9 +51,14 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-build
-vcpkg_installed
+# Target files
+build/
+vcpkg_installed/
 
 # IDE files
 .vscode/
 .idea/
+
+# Test files
+*.lox
+test.lox
