@@ -1,23 +1,34 @@
 #ifndef TOKEN_HPP
 #define TOKEN_HPP
 
-enum class Token {
-    LEFT_PARENTHESIS,
-    RIGHT_PARENTHESIS,
-    LEFT_BRACE,
-    RIGHT_BRACE,
-    LEFT_BRACKET,
-    RIGHT_BRACKET,
-    SEMICOLON,
-    COLON,
-    COMMA,
-    DOT,
-    PLUS,
-    MINUS,
-    ASTERISK,
-    SLASH,
-    END_OF_FILE,
-    UNKNOWN,
+#include <string.h>
+
+enum class TokenType {
+    // Single-character tokens.
+    LEFT_PAREN, RIGHT_PAREN, LEFT_BRACE, RIGHT_BRACE,
+    COMMA, DOT, MINUS, PLUS, SEMICOLON, SLASH, STAR,
+
+    // One or two character tokens.
+    BANG, BANG_EQUAL,
+    EQUAL, EQUAL_EQUAL,
+    GREATER, GREATER_EQUAL,
+    LESS, LESS_EQUAL,
+
+    // Literals.
+    IDENTIFIER, STRING, NUMBER,
+
+    // Keywords.
+    AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
+    PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
+
+    END_OF_FILE, UNKNOWN
+};
+
+struct Token {
+    std::string lexeme;
+    std::string literal;
+    TokenType type;
+    int line;
 };
 
 #endif
