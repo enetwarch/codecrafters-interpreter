@@ -1,15 +1,13 @@
+#include <cstdlib>
 #include <cstring>
-#include <vector>
 #include <iostream>
 #include <string>
-#include <cstdlib>
+#include <vector>
 
 #include "scanner.hpp"
 #include "token.hpp"
 
-std::string stringify_file_contents(const std::string& file_name);
-
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
@@ -26,7 +24,8 @@ int main(int argc, char *argv[]) {
 
         for (Token token : tokens) {
             std::string type = stringify_token_type(token.type);
-            std::cout << type << " " << token.lexeme << " " << token.literal << std::endl;
+            std::cout << type << " " << token.lexeme << " " << token.literal
+                      << std::endl;
         }
     } else {
         std::cerr << "Unknown command: " << command << std::endl;

@@ -1,11 +1,12 @@
-#include <string>
-#include <vector>
-#include <iostream>
+#include "scanner.hpp"
+
 #include <format>
 #include <fstream>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
 
-#include "scanner.hpp"
 #include "token.hpp"
 
 std::string stringify_file_contents(const std::string& file_name) {
@@ -27,9 +28,11 @@ std::vector<Token> tokenize_file_contents(const std::string& file_contents) {
 
     while (scanner.index < scanner.contents.size()) {
         char character = scanner.contents[scanner.index++];
-        scanner.tokens.push_back(tokenize_single_character_token(character, scanner.line));
+        scanner.tokens.push_back(
+            tokenize_single_character_token(character, scanner.line));
     }
-    scanner.tokens.push_back({" ", "null", TokenType::END_OF_FILE, scanner.line});
+    scanner.tokens.push_back(
+        {" ", "null", TokenType::END_OF_FILE, scanner.line});
 
     return scanner.tokens;
 }
@@ -40,7 +43,7 @@ Token tokenize_single_character_token(char character, int line) {
         case ')': return {")", "null", TokenType::RIGHT_PAREN, line};
         case '{': return {"{", "null", TokenType::LEFT_BRACE, line};
         case '}': return {"}", "null", TokenType::RIGHT_BRACE, line};
-        case ',': return {",", "null", TokenType::COMMA, line}; 
+        case ',': return {",", "null", TokenType::COMMA, line};
         case '.': return {".", "null", TokenType::DOT, line};
         case '-': return {"-", "null", TokenType::MINUS, line};
         case '+': return {"+", "null", TokenType::PLUS, line};
