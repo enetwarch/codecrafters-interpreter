@@ -96,6 +96,12 @@ std::optional<Token> tokenize_equality_operator(const Scanner& scanner) {
             }
             return Token{"=", {}, TokenType::EQUAL, scanner.line};
         }
+        case '!': {
+            if (next_character_is_equal) {
+                return Token{"!=", {}, TokenType::BANG_EQUAL, scanner.line};
+            }
+            return Token{"!", {}, TokenType::BANG, scanner.line};
+        }
 
         default: return std::nullopt;
     }
