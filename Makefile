@@ -17,8 +17,10 @@ check: format lint
 
 format:
 	@$(FORMATTER) $(FORMATTER_FLAGS) $(CPP_FILES) $(HPP_FILES)
+	@echo All files formatted!
 
 lint:
 	@for file in $(CPP_FILES) $(HPP_FILES); do \
 		$(LINTER) $(LINTER_FLAGS) $$file --; \
 	done
+	@echo All files linted!
