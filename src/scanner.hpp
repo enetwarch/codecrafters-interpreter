@@ -1,6 +1,7 @@
 #ifndef SCANNER_HPP
 #define SCANNER_HPP
 
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -9,8 +10,8 @@
 struct Scanner {
     std::vector<Token> tokens;
     std::string contents;
+    size_t index;
     int line;
-    int index;
     bool error;
 };
 

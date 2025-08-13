@@ -24,7 +24,9 @@ int main(int argc, char* argv[]) {
 
         for (Token token : tokens) {
             std::string type = stringify_token_type(token.type);
-            std::cout << type << " " << token.lexeme << " " << token.literal
+            std::string literal =
+                token.literal.empty() ? "null" : token.literal;
+            std::cout << type << " " << token.lexeme << " " << literal
                       << std::endl;
         }
     } else {
