@@ -102,6 +102,18 @@ std::optional<Token> tokenize_equality_operator(const Scanner& scanner) {
             }
             return Token{"!", {}, TokenType::BANG, scanner.line};
         }
+        case '<': {
+            if (next_character_is_equal) {
+                return Token{"<=", {}, TokenType::LESS_EQUAL, scanner.line};
+            }
+            return Token{"<", {}, TokenType::LESS, scanner.line};
+        }
+        case '>': {
+            if (next_character_is_equal) {
+                return Token{">=", {}, TokenType::GREATER_EQUAL, scanner.line};
+            }
+            return Token{">", {}, TokenType::GREATER, scanner.line};
+        }
 
         default: return std::nullopt;
     }
