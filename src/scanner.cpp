@@ -1,5 +1,6 @@
 #include "scanner.hpp"
 
+#include <cctype>
 #include <format>
 #include <fstream>
 #include <iostream>
@@ -17,6 +18,7 @@ std::optional<Token> tokenize_equality_operator(const Scanner& scanner);
 std::optional<Token> tokenize_potential_comment(const Scanner& scanner);
 
 char scan_character(const Scanner& scanner, size_t offset = 0);
+bool is_at_end(const Scanner& scanner);
 void throw_error(int line, const std::string& message);
 
 std::string stringify_file_contents(const std::string& file_name) {
@@ -36,15 +38,18 @@ std::string stringify_file_contents(const std::string& file_name) {
 std::vector<Token> tokenize_file_contents(const std::string& file_contents) {
     Scanner scanner{.contents = file_contents, .line = 1};
 
-    while (scanner.index < scanner.contents.size()) {
+    while (!is_at_end(scanner)) {
         scanner = tokenize_next_possible_lexeme(scanner);
     }
-    scanner.tokens.push_back({"", {}, TokenType::END_OF_FILE, scanner.line});
+    scanner.tokens.push_back(Token{.type = TokenType::END_OF_FILE});
 
     return scanner.tokens;
 }
 
 Scanner& tokenize_next_possible_lexeme(Scanner& scanner) {
+    while (std::isspace(scan_character(scanner))) scanner.index++;
+    if (is_at_end(scanner)) return scanner;
+
     std::optional<Token> single_character_token =
         tokenize_single_character(scanner);
     if (single_character_token.has_value()) {
@@ -136,8 +141,13 @@ std::optional<Token> tokenize_potential_comment(const Scanner& scanner) {
 char scan_character(const Scanner& scanner, size_t offset) {
     size_t character_index = scanner.index + offset;
 
-    if (scanner.contents.size() < character_index) return '\0';
+    if (character_index < 0 || scanner.contents.size() < character_index)
+        return '\0';
     return scanner.contents[character_index];
+}
+
+bool is_at_end(const Scanner& scanner) {
+    return scanner.index >= scanner.contents.size();
 }
 
 void throw_error(int line, const std::string& message) {
