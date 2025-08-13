@@ -6,16 +6,16 @@ A [Lox Interpreter](https://craftinginterpreters.com/the-lox-language.html) made
 
 ### Stages
 
-- [ ] Scanning: Empty file
-- [ ] Scanning: Parentheses
-- [ ] Scanning: Braces
-- [ ] Scanning: Other single-character tokens
-- [ ] Scanning: Lexical errors
-- [ ] Scanning: Assignment & equality Operators
-- [ ] Scanning: Negation & inequality operators
-- [ ] Scanning: Relational operators
-- [ ] Scanning: Division operator & comments
-- [ ] Scanning: Whitespace
+- [x] Scanning: Empty file
+- [x] Scanning: Parentheses
+- [x] Scanning: Braces
+- [x] Scanning: Other single-character tokens
+- [x] Scanning: Lexical errors
+- [x] Scanning: Assignment & equality Operators
+- [x] Scanning: Negation & inequality operators
+- [x] Scanning: Relational operators
+- [x] Scanning: Division operator & comments
+- [x] Scanning: Whitespace
 - [ ] Scanning: Multi-line errors
 - [ ] Scanning: String literals
 - [ ] Scanning: Number literals
