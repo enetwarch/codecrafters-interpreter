@@ -11,11 +11,10 @@ struct Scanner {
     std::string contents;
     int line;
     int index;
+    bool error;
 };
 
 std::string stringify_file_contents(const std::string& file_name);
 std::vector<Token> tokenize_file_contents(const std::string& file_contents);
-
-Token tokenize_single_character_token(char character, int line);
 
 #endif

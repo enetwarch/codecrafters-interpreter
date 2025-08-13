@@ -3,11 +3,17 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include "token.hpp"
+
+Scanner& tokenize_next_possible_lexeme(Scanner& scanner);
+std::optional<Token> tokenize_single_character_token(char character, int line);
+
+void throw_error(int line, const std::string& message);
 
 std::string stringify_file_contents(const std::string& file_name) {
     std::ifstream file(file_name);
@@ -27,9 +33,7 @@ std::vector<Token> tokenize_file_contents(const std::string& file_contents) {
     Scanner scanner{.contents = file_contents, .line = 1};
 
     while (scanner.index < scanner.contents.size()) {
-        char character = scanner.contents[scanner.index++];
-        scanner.tokens.push_back(
-            tokenize_single_character_token(character, scanner.line));
+        scanner = tokenize_next_possible_lexeme(scanner);
     }
     scanner.tokens.push_back(
         {" ", "null", TokenType::END_OF_FILE, scanner.line});
@@ -37,20 +41,41 @@ std::vector<Token> tokenize_file_contents(const std::string& file_contents) {
     return scanner.tokens;
 }
 
-Token tokenize_single_character_token(char character, int line) {
-    switch (character) {
-        case '(': return {"(", "null", TokenType::LEFT_PAREN, line};
-        case ')': return {")", "null", TokenType::RIGHT_PAREN, line};
-        case '{': return {"{", "null", TokenType::LEFT_BRACE, line};
-        case '}': return {"}", "null", TokenType::RIGHT_BRACE, line};
-        case ',': return {",", "null", TokenType::COMMA, line};
-        case '.': return {".", "null", TokenType::DOT, line};
-        case '-': return {"-", "null", TokenType::MINUS, line};
-        case '+': return {"+", "null", TokenType::PLUS, line};
-        case ';': return {";", "null", TokenType::SEMICOLON, line};
-        case '/': return {"/", "null", TokenType::SLASH, line};
-        case '*': return {"*", "null", TokenType::STAR, line};
+Scanner& tokenize_next_possible_lexeme(Scanner& scanner) {
+    char character = scanner.contents[scanner.index];
 
-        default: return {{}, {}, TokenType::UNKNOWN, line};
+    std::optional<Token> single_character_token =
+        tokenize_single_character_token(character, scanner.line);
+    if (single_character_token.has_value()) {
+        scanner.index += 1;
+        scanner.tokens.push_back(single_character_token.value());
+        return scanner;
     }
+
+    throw_error(scanner.line, std::format("Unexpected character: {}", character));
+    scanner.error = true;
+    scanner.index += 1;
+    return scanner;
+}
+
+std::optional<Token> tokenize_single_character_token(char character, int line) {
+    switch (character) {
+        case '(': return Token{"(", "null", TokenType::LEFT_PAREN, line};
+        case ')': return Token{")", "null", TokenType::RIGHT_PAREN, line};
+        case '{': return Token{"{", "null", TokenType::LEFT_BRACE, line};
+        case '}': return Token{"}", "null", TokenType::RIGHT_BRACE, line};
+        case ',': return Token{",", "null", TokenType::COMMA, line};
+        case '.': return Token{".", "null", TokenType::DOT, line};
+        case '-': return Token{"-", "null", TokenType::MINUS, line};
+        case '+': return Token{"+", "null", TokenType::PLUS, line};
+        case ';': return Token{";", "null", TokenType::SEMICOLON, line};
+        case '/': return Token{"/", "null", TokenType::SLASH, line};
+        case '*': return Token{"*", "null", TokenType::STAR, line};
+
+        default: return std::nullopt;
+    }
+}
+
+void throw_error(int line, const std::string& message) {
+    std::cout << "[line " << line << "] Error: " << message << std::endl;
 }
