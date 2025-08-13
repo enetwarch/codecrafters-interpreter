@@ -62,3 +62,7 @@ vcpkg_installed/
 # Test files
 *.lox
 test.lox
+
+# Env files
+*.env
+.env
