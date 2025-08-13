@@ -31,4 +31,6 @@ struct Token {
     int line;
 };
 
+std::string stringify_token_type(TokenType token_type);
+
 #endif
