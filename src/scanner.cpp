@@ -19,7 +19,7 @@ std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner);
 std::optional<Scanner*> tokenize_potential_comment(Scanner& scanner);
 Scanner& report_unknown_character_error(Scanner& scanner);
 
-Scanner* tokenize(Scanner& scanner, TokenType token_type, int advance);
+Scanner* tokenize(Scanner& scanner, TokenType token_type, size_t advance);
 char scan_character(const Scanner& scanner, size_t offset = 0);
 void throw_error(int line, const std::string& message);
 
