@@ -22,11 +22,9 @@ int main(int argc, char* argv[]) {
         std::string file_contents = stringify_file_contents(file_name);
         std::vector<Token> tokens = tokenize_file_contents(file_contents);
 
-        for (Token token : tokens) {
-            std::string type = stringify_token_type(token.type);
-            std::string literal =
-                token.literal.empty() ? "null" : token.literal;
-            std::cout << type << " " << token.lexeme << " " << literal
+        for (Token& token : tokens) {
+            std::cout << stringify_token_type(token.type) << " "
+                      << lexemize_token_type(token.type) << " " << token.literal
                       << std::endl;
         }
     } else {
