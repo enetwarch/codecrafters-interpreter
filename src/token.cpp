@@ -5,6 +5,7 @@
 // TODO: Replace this with the magic_enum library.
 std::string stringify_token_type(TokenType token_type) {
     switch (token_type) {
+        // Single-character tokens.
         case TokenType::LEFT_PAREN: return "LEFT_PAREN";
         case TokenType::RIGHT_PAREN: return "RIGHT_PAREN";
         case TokenType::LEFT_BRACE: return "LEFT_BRACE";
@@ -16,6 +17,8 @@ std::string stringify_token_type(TokenType token_type) {
         case TokenType::SEMICOLON: return "SEMICOLON";
         case TokenType::SLASH: return "SLASH";
         case TokenType::STAR: return "STAR";
+
+        // One or two character tokens.
         case TokenType::BANG: return "BANG";
         case TokenType::BANG_EQUAL: return "BANG_EQUAL";
         case TokenType::EQUAL: return "EQUAL";
@@ -24,9 +27,13 @@ std::string stringify_token_type(TokenType token_type) {
         case TokenType::GREATER_EQUAL: return "GREATER_EQUAL";
         case TokenType::LESS: return "LESS";
         case TokenType::LESS_EQUAL: return "LESS_EQUAL";
+
+        // Literals.
         case TokenType::IDENTIFIER: return "IDENTIFIER";
         case TokenType::STRING: return "STRING";
         case TokenType::NUMBER: return "NUMBER";
+
+        // Keywords.
         case TokenType::AND: return "AND";
         case TokenType::CLASS: return "CLASS";
         case TokenType::ELSE: return "ELSE";
@@ -43,8 +50,8 @@ std::string stringify_token_type(TokenType token_type) {
         case TokenType::TRUE: return "TRUE";
         case TokenType::VAR: return "VAR";
         case TokenType::WHILE: return "WHILE";
-        case TokenType::END_OF_FILE: return "EOF";
 
+        case TokenType::END_OF_FILE: return "EOF";
         default: return "UNKNOWN";
     }
 }

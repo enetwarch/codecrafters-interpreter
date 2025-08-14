@@ -15,8 +15,8 @@
 Scanner& tokenize_next_possible_lexeme(Scanner& scanner);
 
 std::optional<Scanner*> tokenize_single_character(Scanner& scanner);
-std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner);
 std::optional<Scanner*> tokenize_potential_comment(Scanner& scanner);
+std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner);
 Scanner& report_unknown_character_error(Scanner& scanner);
 
 Scanner* tokenize(Scanner& scanner, TokenType token_type, size_t advance);
@@ -53,8 +53,8 @@ Scanner& tokenize_next_possible_lexeme(Scanner& scanner) {
     if (scanner.index >= scanner.contents.size()) return scanner;
 
     if (tokenize_single_character(scanner).has_value()) return scanner;
-    if (tokenize_equality_operator(scanner).has_value()) return scanner;
     if (tokenize_potential_comment(scanner).has_value()) return scanner;
+    if (tokenize_equality_operator(scanner).has_value()) return scanner;
 
     return report_unknown_character_error(scanner);
 }
@@ -67,30 +67,10 @@ std::optional<Scanner*> tokenize_single_character(Scanner& scanner) {
         case '}': return tokenize(scanner, TokenType::RIGHT_BRACE, 1);
         case ',': return tokenize(scanner, TokenType::COMMA, 1);
         case '.': return tokenize(scanner, TokenType::DOT, 1);
-        case ';': return tokenize(scanner, TokenType::SEMICOLON, 1);
-        case '+': return tokenize(scanner, TokenType::PLUS, 1);
         case '-': return tokenize(scanner, TokenType::MINUS, 1);
+        case '+': return tokenize(scanner, TokenType::PLUS, 1);
+        case ';': return tokenize(scanner, TokenType::SEMICOLON, 1);
         case '*': return tokenize(scanner, TokenType::STAR, 1);
-
-        default: return std::nullopt;
-    }
-}
-
-std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner) {
-    bool equal_next = scan_character(scanner, 1) == '=';
-    switch (scan_character(scanner)) {
-        case '=':
-            if (!equal_next) return tokenize(scanner, TokenType::EQUAL, 1);
-            return tokenize(scanner, TokenType::EQUAL_EQUAL, 2);
-        case '!':
-            if (!equal_next) return tokenize(scanner, TokenType::BANG, 1);
-            return tokenize(scanner, TokenType::BANG_EQUAL, 2);
-        case '<':
-            if (!equal_next) return tokenize(scanner, TokenType::LESS, 1);
-            return tokenize(scanner, TokenType::LESS_EQUAL, 2);
-        case '>':
-            if (!equal_next) return tokenize(scanner, TokenType::GREATER, 1);
-            return tokenize(scanner, TokenType::GREATER_EQUAL, 2);
 
         default: return std::nullopt;
     }
@@ -105,6 +85,26 @@ std::optional<Scanner*> tokenize_potential_comment(Scanner& scanner) {
     std::unordered_set<char> terminators = {'\n', '\0'};
     while (!terminators.contains(scan_character(scanner))) scanner.index++;
     return &scanner;
+}
+
+std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner) {
+    bool equal_next = scan_character(scanner, 1) == '=';
+    switch (scan_character(scanner)) {
+        case '!':
+            if (!equal_next) return tokenize(scanner, TokenType::BANG, 1);
+            return tokenize(scanner, TokenType::BANG_EQUAL, 2);
+        case '=':
+            if (!equal_next) return tokenize(scanner, TokenType::EQUAL, 1);
+            return tokenize(scanner, TokenType::EQUAL_EQUAL, 2);
+        case '>':
+            if (!equal_next) return tokenize(scanner, TokenType::GREATER, 1);
+            return tokenize(scanner, TokenType::GREATER_EQUAL, 2);
+        case '<':
+            if (!equal_next) return tokenize(scanner, TokenType::LESS, 1);
+            return tokenize(scanner, TokenType::LESS_EQUAL, 2);
+
+        default: return std::nullopt;
+    }
 }
 
 Scanner& report_unknown_character_error(Scanner& scanner) {
