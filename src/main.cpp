@@ -20,9 +20,9 @@ int main(int argc, char* argv[]) {
     const std::string file_name = argv[2];
     if (command == "tokenize") {
         std::string file_contents = stringify_file_contents(file_name);
-        std::vector<Token> tokens = tokenize_file_contents(file_contents);
+        Scanner scanner = tokenize_file_contents(file_contents);
 
-        for (Token& token : tokens) {
+        for (const Token& token : scanner.tokens) {
             std::cout << stringify_token_type(token.type) << " "
                       << lexemize_token_type(token.type) << " " << token.literal
                       << std::endl;

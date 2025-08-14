@@ -16,6 +16,6 @@ struct Scanner {
 };
 
 std::string stringify_file_contents(const std::string& file_name);
-std::vector<Token> tokenize_file_contents(const std::string& file_contents);
+Scanner tokenize_file_contents(const std::string& file_contents);
 
 #endif

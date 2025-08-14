@@ -37,7 +37,7 @@ std::string stringify_file_contents(const std::string& file_name) {
     return buffer.str();
 }
 
-std::vector<Token> tokenize_file_contents(const std::string& file_contents) {
+Scanner tokenize_file_contents(const std::string& file_contents) {
     Scanner scanner{.contents = file_contents, .line = 1};
 
     while (scanner.index < scanner.contents.size()) {
@@ -45,11 +45,14 @@ std::vector<Token> tokenize_file_contents(const std::string& file_contents) {
     }
     scanner.tokens.push_back(Token{.type = TokenType::END_OF_FILE});
 
-    return scanner.tokens;
+    return scanner;
 }
 
 Scanner& tokenize_next_possible_lexeme(Scanner& scanner) {
-    while (std::isspace(scan_character(scanner))) scanner.index++;
+    while (std::isspace(scan_character(scanner))) {
+        if (scan_character(scanner) == '\n') scanner.line++;
+        scanner.index++;
+    }
     if (scanner.index >= scanner.contents.size()) return scanner;
 
     if (tokenize_single_character(scanner).has_value()) return scanner;
@@ -112,7 +115,7 @@ Scanner& report_unknown_character_error(Scanner& scanner) {
     throw_error(scanner.line, std::format("Unknown character: {}", c));
 
     scanner.error = true;
-    scanner.index += 1;
+    scanner.index++;
     return scanner;
 }
 
