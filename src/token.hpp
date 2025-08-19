@@ -62,6 +62,5 @@ struct Token {
 };
 
 std::string stringify_token_type(TokenType token_type);
-std::string lexemize_token_type(TokenType token_type);
 
 #endif
