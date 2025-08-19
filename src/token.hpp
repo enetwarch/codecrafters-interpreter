@@ -55,9 +55,10 @@ enum class TokenType {
 };
 
 struct Token {
-    std::string literal = "null";
-    TokenType type = TokenType::UNKNOWN;
-    int line{};
+    TokenType type{TokenType::UNKNOWN};
+    std::string lexeme{""};
+    std::string literal{"null"};
+    int line{0};
 };
 
 std::string stringify_token_type(TokenType token_type);

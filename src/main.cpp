@@ -1,11 +1,15 @@
 #include <cstdlib>
 #include <cstring>
+#include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
 #include "scanner.hpp"
 #include "token.hpp"
+
+std::string read_file(const std::string& filename);
 
 int main(int argc, char* argv[]) {
     std::cout << std::unitbuf;
@@ -19,13 +23,11 @@ int main(int argc, char* argv[]) {
     const std::string command = argv[1];
     const std::string file_name = argv[2];
     if (command == "tokenize") {
-        std::string file_contents = stringify_file_contents(file_name);
-        Scanner scanner = tokenize_file_contents(file_contents);
+        Scanner scanner(read_file(file_name));
 
-        for (const Token& token : scanner.tokens) {
-            std::cout << stringify_token_type(token.type) << " "
-                      << lexemize_token_type(token.type) << " " << token.literal
-                      << std::endl;
+        for (const Token& token : scanner.scan_tokens()) {
+            std::cout << stringify_token_type(token.type) << " " << token.lexeme
+                      << " " << token.literal << std::endl;
         }
     } else {
         std::cerr << "Unknown command: " << command << std::endl;
@@ -33,4 +35,18 @@ int main(int argc, char* argv[]) {
     }
 
     return EXIT_SUCCESS;
+}
+
+std::string read_file(const std::string& file_name) {
+    std::ifstream file(file_name);
+    if (!file.is_open()) {
+        std::cerr << "Error reading file: " << file_name << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+
+    return buffer.str();
 }

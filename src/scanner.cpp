@@ -2,137 +2,94 @@
 
 #include <cctype>
 #include <format>
-#include <fstream>
 #include <iostream>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
 #include "token.hpp"
+using enum TokenType;
 
-Scanner& tokenize_next_possible_lexeme(Scanner& scanner);
+Scanner::Scanner(std::string file_contents)
+    : file_contents{std::move(file_contents)} {}
 
-std::optional<Scanner*> tokenize_single_character(Scanner& scanner);
-std::optional<Scanner*> tokenize_potential_comment(Scanner& scanner);
-std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner);
-Scanner& report_unknown_character_error(Scanner& scanner);
-
-Scanner* tokenize(Scanner& scanner, TokenType token_type, size_t advance);
-char scan_character(const Scanner& scanner, size_t offset = 0);
-void throw_error(int line, const std::string& message);
-
-std::string stringify_file_contents(const std::string& file_name) {
-    std::ifstream file(file_name);
-    if (!file.is_open()) {
-        std::cerr << "Error reading file: " << file_name << std::endl;
-        std::exit(EXIT_FAILURE);
+std::vector<Token>& Scanner::scan_tokens() {
+    while (!is_at_end()) {
+        starting_index = current_index;
+        scan_token();
     }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-
-    return buffer.str();
+    tokens.push_back(Token{.type = END_OF_FILE, .line = current_line});
+    return tokens;
 }
 
-Scanner tokenize_file_contents(const std::string& file_contents) {
-    Scanner scanner{.contents = file_contents, .line = 1};
+void Scanner::scan_token() {
+    switch (advance()) {
+        case '(': add_token(LEFT_PAREN); break;
+        case ')': add_token(RIGHT_PAREN); break;
+        case '{': add_token(LEFT_BRACE); break;
+        case '}': add_token(RIGHT_BRACE); break;
+        case ',': add_token(COMMA); break;
+        case '.': add_token(DOT); break;
+        case '-': add_token(MINUS); break;
+        case '+': add_token(PLUS); break;
+        case ';': add_token(SEMICOLON); break;
+        case '*': add_token(STAR); break;
 
-    while (scanner.index < scanner.contents.size()) {
-        scanner = tokenize_next_possible_lexeme(scanner);
-    }
-    scanner.tokens.push_back(Token{.type = TokenType::END_OF_FILE});
+        case '!': add_token(match('=') ? BANG_EQUAL : BANG); break;
+        case '=': add_token(match('=') ? EQUAL_EQUAL : EQUAL); break;
+        case '>': add_token(match('=') ? GREATER_EQUAL : EQUAL); break;
+        case '<': add_token(match('=') ? LESS_EQUAL : EQUAL); break;
+        case '/': match('/') ? skip_line() : add_token(SLASH); break;
 
-    return scanner;
-}
+        case ' ': [[fallthrough]];
+        case '\f': [[fallthrough]];
+        case '\r': [[fallthrough]];
+        case '\t': [[fallthrough]];
+        case '\v': break;
+        case '\n': current_line++; break;
 
-Scanner& tokenize_next_possible_lexeme(Scanner& scanner) {
-    while (std::isspace(scan_character(scanner))) {
-        if (scan_character(scanner) == '\n') scanner.line++;
-        scanner.index++;
-    }
-    if (scanner.index >= scanner.contents.size()) return scanner;
-
-    if (tokenize_single_character(scanner).has_value()) return scanner;
-    if (tokenize_potential_comment(scanner).has_value()) return scanner;
-    if (tokenize_equality_operator(scanner).has_value()) return scanner;
-
-    return report_unknown_character_error(scanner);
-}
-
-std::optional<Scanner*> tokenize_single_character(Scanner& scanner) {
-    switch (scan_character(scanner)) {
-        case '(': return tokenize(scanner, TokenType::LEFT_PAREN, 1);
-        case ')': return tokenize(scanner, TokenType::RIGHT_PAREN, 1);
-        case '{': return tokenize(scanner, TokenType::LEFT_BRACE, 1);
-        case '}': return tokenize(scanner, TokenType::RIGHT_BRACE, 1);
-        case ',': return tokenize(scanner, TokenType::COMMA, 1);
-        case '.': return tokenize(scanner, TokenType::DOT, 1);
-        case '-': return tokenize(scanner, TokenType::MINUS, 1);
-        case '+': return tokenize(scanner, TokenType::PLUS, 1);
-        case ';': return tokenize(scanner, TokenType::SEMICOLON, 1);
-        case '*': return tokenize(scanner, TokenType::STAR, 1);
-
-        default: return std::nullopt;
+        default: error(current_line, "Unexpected character."); break;
     }
 }
 
-std::optional<Scanner*> tokenize_potential_comment(Scanner& scanner) {
-    if (scan_character(scanner) != '/') return std::nullopt;
-    if (scan_character(scanner, 1) != '/') {
-        return tokenize(scanner, TokenType::SLASH, 1);
-    }
-
-    std::unordered_set<char> terminators = {'\n', '\0'};
-    while (!terminators.contains(scan_character(scanner))) scanner.index++;
-    return &scanner;
+void Scanner::skip_space() {
+    if (!std::isspace(peek())) return;
 }
 
-std::optional<Scanner*> tokenize_equality_operator(Scanner& scanner) {
-    bool equal_next = scan_character(scanner, 1) == '=';
-    switch (scan_character(scanner)) {
-        case '!':
-            if (!equal_next) return tokenize(scanner, TokenType::BANG, 1);
-            return tokenize(scanner, TokenType::BANG_EQUAL, 2);
-        case '=':
-            if (!equal_next) return tokenize(scanner, TokenType::EQUAL, 1);
-            return tokenize(scanner, TokenType::EQUAL_EQUAL, 2);
-        case '>':
-            if (!equal_next) return tokenize(scanner, TokenType::GREATER, 1);
-            return tokenize(scanner, TokenType::GREATER_EQUAL, 2);
-        case '<':
-            if (!equal_next) return tokenize(scanner, TokenType::LESS, 1);
-            return tokenize(scanner, TokenType::LESS_EQUAL, 2);
-
-        default: return std::nullopt;
-    }
+void Scanner::skip_line() {
+    while (!is_at_end() && peek() != '\n') advance();
 }
 
-Scanner& report_unknown_character_error(Scanner& scanner) {
-    char c = scan_character(scanner);
-    throw_error(scanner.line, std::format("Unknown character: {}", c));
-
-    scanner.error = true;
-    scanner.index++;
-    return scanner;
+void Scanner::add_token(TokenType type) { add_token(type, "null"); }
+void Scanner::add_token(TokenType type, const std::string& literal) {
+    std::string lexeme =
+        file_contents.substr(starting_index, current_index - starting_index);
+    tokens.push_back(Token{type, lexeme, literal, current_line});
 }
 
-Scanner* tokenize(Scanner& scanner, TokenType token_type, size_t advance) {
-    scanner.index += advance;
-    scanner.tokens.push_back(Token{.type = token_type});
-
-    return &scanner;
+bool Scanner::is_at_end() const {
+    return current_index >= file_contents.size();
 }
 
-char scan_character(const Scanner& scanner, size_t offset) {
-    size_t character_index = scanner.index + offset;
-
-    if (character_index >= scanner.contents.size()) return '\0';
-    return scanner.contents[character_index];
+char Scanner::advance() {
+    if (is_at_end()) return '\0';
+    return file_contents[current_index++];
 }
 
-void throw_error(int line, const std::string& message) {
+char Scanner::peek() const {
+    if (is_at_end()) return '\0';
+    return file_contents[current_index];
+}
+
+bool Scanner::match(char expected) {
+    if (is_at_end() || peek() != expected) return false;
+    current_index++;
+    return true;
+}
+
+void Scanner::error(int line, const std::string& message) {
+    has_error = true;
     std::cout << "[line " << line << "] Error: " << message << std::endl;
 }
