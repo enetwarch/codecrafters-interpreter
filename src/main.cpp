@@ -2,6 +2,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -27,7 +28,8 @@ int main(int argc, char* argv[]) {
 
         for (const Token& token : scanner.scan_tokens()) {
             std::cout << stringify_token_type(token.type) << " " << token.lexeme
-                      << " " << token.literal << std::endl;
+                      << " " << stringify_token_literal(token.literal)
+                      << std::endl;
         }
     } else {
         std::cerr << "Unknown command: " << command << std::endl;

@@ -1,7 +1,9 @@
 #ifndef TOKEN_HPP
 #define TOKEN_HPP
 
+#include <optional>
 #include <string>
+#include <variant>
 
 enum class TokenType {
     // Single-character tokens.
@@ -54,13 +56,16 @@ enum class TokenType {
     UNKNOWN
 };
 
+using Literal = std::optional<std::variant<std::string, double>>;
+
 struct Token {
     TokenType type{TokenType::UNKNOWN};
     std::string lexeme{""};
-    std::string literal{"null"};
+    Literal literal{};
     int line{0};
 };
 
 std::string stringify_token_type(TokenType token_type);
+std::string stringify_token_literal(const Literal& literal);
 
 #endif

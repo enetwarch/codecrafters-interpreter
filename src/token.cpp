@@ -1,7 +1,10 @@
 #include "token.hpp"
 using enum TokenType;
 
+#include <optional>
 #include <string>
+#include <type_traits>
+#include <variant>
 #include <vector>
 
 std::string stringify_token_type(TokenType token_type) {
@@ -55,4 +58,25 @@ std::string stringify_token_type(TokenType token_type) {
         case END_OF_FILE: return "EOF";
         default: return "UNKNOWN";
     }
+}
+
+std::string stringify_token_literal(const Literal& literal) {
+    if (!literal.has_value()) return "null";
+
+    return std::visit(
+        [](auto&& value) -> std::string {
+            using Type = std::decay_t<decltype(value)>;
+
+            if constexpr (std::is_same_v<Type, std::string>) return value;
+            if constexpr (std::is_same_v<Type, double>) {
+                std::string number = std::to_string(value);
+                number.erase(number.find_last_not_of('0') + 1);
+
+                if (number.back() == '.') number += '0';
+                return number;
+            }
+
+            return "null";
+        },
+        *literal);
 }

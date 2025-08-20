@@ -1,5 +1,6 @@
 #include "scanner.hpp"
 
+#include <any>
 #include <cctype>
 #include <format>
 #include <iostream>
@@ -26,7 +27,8 @@ std::vector<Token>& Scanner::scan_tokens() {
 }
 
 void Scanner::scan_token() {
-    switch (advance()) {
+    char character = advance();
+    switch (character) {
         case '(': add_token(LEFT_PAREN); break;
         case ')': add_token(RIGHT_PAREN); break;
         case '{': add_token(LEFT_BRACE); break;
@@ -44,8 +46,6 @@ void Scanner::scan_token() {
         case '<': add_token(match('=') ? LESS_EQUAL : EQUAL); break;
         case '/': match('/') ? skip_line() : add_token(SLASH); break;
 
-        case '"': string(); break;
-
         case ' ': [[fallthrough]];
         case '\f': [[fallthrough]];
         case '\r': [[fallthrough]];
@@ -53,7 +53,16 @@ void Scanner::scan_token() {
         case '\v': break;
         case '\n': current_line++; break;
 
-        default: error(current_line, "Unexpected character."); break;
+        case '"': string(); break;
+
+        default: {
+            if (std::isdigit(character)) {
+                number();
+            } else {
+                error(current_line, "Unexpected character.");
+            }
+            break;
+        }
     }
 }
 
@@ -70,7 +79,7 @@ void Scanner::string() {
     while (!is_at_end() && peek() != '"') advance();
 
     if (!is_at_end()) {
-        advance();
+        advance();  // Consume closing quotation mark ('"').
         std::string literal = file_contents.substr(
             starting_index + 1, current_index - starting_index - 2);
         add_token(STRING, literal);
@@ -79,8 +88,21 @@ void Scanner::string() {
     }
 }
 
-void Scanner::add_token(TokenType type) { add_token(type, "null"); }
-void Scanner::add_token(TokenType type, const std::string& literal) {
+void Scanner::number() {
+    while (!is_at_end() && std::isdigit(peek())) advance();
+
+    if (peek() == '.' && std::isdigit(peek_next())) {
+        advance();  // Consume decimal point ('.').
+        while (!is_at_end() && std::isdigit(peek())) advance();
+    }
+
+    double literal = std::stod(
+        file_contents.substr(starting_index, current_index - starting_index));
+    add_token(NUMBER, literal);
+}
+
+void Scanner::add_token(TokenType type) { add_token(type, std::nullopt); }
+void Scanner::add_token(TokenType type, const Literal& literal) {
     std::string lexeme =
         file_contents.substr(starting_index, current_index - starting_index);
     tokens.push_back(Token{type, lexeme, literal, current_line});
@@ -99,6 +121,12 @@ char Scanner::advance() {
 char Scanner::peek() const {
     if (is_at_end()) return '\0';
     return file_contents[current_index];
+}
+
+char Scanner::peek_next() const {
+    std::size_t next_index = current_index + 1;
+    if (next_index >= file_contents.size()) return '\0';
+    return file_contents[next_index];
 }
 
 bool Scanner::match(char expected) {
