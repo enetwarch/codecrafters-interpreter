@@ -21,6 +21,7 @@ class Scanner {
 
    private:
     void scan_token();
+    void skip_space();
     void skip_line();
     void string();
 

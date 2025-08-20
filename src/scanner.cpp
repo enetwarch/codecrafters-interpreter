@@ -16,6 +16,7 @@ Scanner::Scanner(std::string file_contents)
 
 std::vector<Token>& Scanner::scan_tokens() {
     while (!is_at_end()) {
+        skip_space();
         starting_index = current_index;
         scan_token();
     }
@@ -43,6 +44,8 @@ void Scanner::scan_token() {
         case '<': add_token(match('=') ? LESS_EQUAL : EQUAL); break;
         case '/': match('/') ? skip_line() : add_token(SLASH); break;
 
+        case '"': string(); break;
+
         case ' ': [[fallthrough]];
         case '\f': [[fallthrough]];
         case '\r': [[fallthrough]];
@@ -50,21 +53,21 @@ void Scanner::scan_token() {
         case '\v': break;
         case '\n': current_line++; break;
 
-        case '"': string(); break;
-
         default: error(current_line, "Unexpected character."); break;
     }
 }
 
+void Scanner::skip_space() {
+    while (!is_at_end() && std::isspace(peek())) advance();
+}
+
 void Scanner::skip_line() {
     while (!is_at_end() && peek() != '\n') advance();
+    advance();
 }
 
 void Scanner::string() {
-    while (!is_at_end() && peek() != '"') {
-        if (peek() == '\n') current_line++;
-        advance();
-    }
+    while (!is_at_end() && peek() != '"') advance();
 
     if (!is_at_end()) {
         advance();
@@ -89,6 +92,7 @@ bool Scanner::is_at_end() const {
 
 char Scanner::advance() {
     if (is_at_end()) return '\0';
+    if (peek() == '\n') current_line++;
     return file_contents[current_index++];
 }
 
