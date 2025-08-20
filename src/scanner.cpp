@@ -50,16 +50,30 @@ void Scanner::scan_token() {
         case '\v': break;
         case '\n': current_line++; break;
 
+        case '"': string(); break;
+
         default: error(current_line, "Unexpected character."); break;
     }
 }
 
-void Scanner::skip_space() {
-    if (!std::isspace(peek())) return;
-}
-
 void Scanner::skip_line() {
     while (!is_at_end() && peek() != '\n') advance();
+}
+
+void Scanner::string() {
+    while (!is_at_end() && peek() != '"') {
+        if (peek() == '\n') current_line++;
+        advance();
+    }
+
+    if (!is_at_end()) {
+        advance();
+        std::string literal = file_contents.substr(
+            starting_index + 1, current_index - starting_index - 2);
+        add_token(STRING, literal);
+    } else {
+        error(current_line, "Unterminated string.");
+    }
 }
 
 void Scanner::add_token(TokenType type) { add_token(type, "null"); }

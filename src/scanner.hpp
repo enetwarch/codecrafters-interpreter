@@ -21,8 +21,8 @@ class Scanner {
 
    private:
     void scan_token();
-    void skip_space();
     void skip_line();
+    void string();
 
     void add_token(TokenType type);
     void add_token(TokenType type, const std::string& literal);
