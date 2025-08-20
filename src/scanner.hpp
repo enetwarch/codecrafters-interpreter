@@ -27,6 +27,7 @@ class Scanner {
 
     void string();
     void number();
+    void identifier();
 
     void add_token(TokenType type);
     void add_token(TokenType type, const Literal& literal);

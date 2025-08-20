@@ -6,7 +6,7 @@
 #include <iostream>
 #include <optional>
 #include <string>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
 
 #include "token.hpp"
@@ -18,6 +18,7 @@ Scanner::Scanner(std::string file_contents)
 std::vector<Token>& Scanner::scan_tokens() {
     while (!is_at_end()) {
         skip_space();
+        if (is_at_end()) break;
         starting_index = current_index;
         scan_token();
     }
@@ -58,8 +59,11 @@ void Scanner::scan_token() {
         default: {
             if (std::isdigit(character)) {
                 number();
+            } else if (std::isalpha(character)) {
+                identifier();
             } else {
-                error(current_line, "Unexpected character.");
+                error(current_line,
+                      std::format("Unexpected character '{}'.", character));
             }
             break;
         }
@@ -99,6 +103,19 @@ void Scanner::number() {
     double literal = std::stod(
         file_contents.substr(starting_index, current_index - starting_index));
     add_token(NUMBER, literal);
+}
+
+void Scanner::identifier() {
+    static std::unordered_map<std::string, TokenType> keywords{
+        {"and", AND},   {"class", CLASS}, {"else", ELSE},     {"false", FALSE},
+        {"for", FOR},   {"fun", FUN},     {"if", IF},         {"nil", NIL},
+        {"or", OR},     {"print", PRINT}, {"return", RETURN}, {"super", SUPER},
+        {"this", THIS}, {"true", TRUE},   {"var", VAR},       {"while", WHILE}};
+
+    while (std::isalnum(peek())) advance();
+    std::string key =
+        file_contents.substr(starting_index, current_index - starting_index);
+    add_token(keywords.contains(key) ? keywords[key] : IDENTIFIER);
 }
 
 void Scanner::add_token(TokenType type) { add_token(type, std::nullopt); }

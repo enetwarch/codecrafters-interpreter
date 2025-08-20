@@ -61,7 +61,7 @@ using Literal = std::optional<std::variant<std::string, double>>;
 struct Token {
     TokenType type{TokenType::UNKNOWN};
     std::string lexeme{""};
-    Literal literal{};
+    Literal literal{std::nullopt};
     int line{0};
 };
 
